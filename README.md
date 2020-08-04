@@ -360,6 +360,93 @@ man.render();
   Существует общепринятное правило, что если свойство или метод имеет знак нижнего подчеркивания `_` вначале, то такое свойство или метод являются приватными, а значит не стоит изменять его напрямую, например `man._content = 'Какое-то содержимое...'`. Для изменения таких свойств следует использовать [геттеры и сеттеры](https://learn.javascript.ru/property-accessors). Это свойства-аксессоры (accessor properties). По своей сути это функции, которые используются для присвоения и получения значения, но во внешнем коде они выглядят как обычные свойства объекта. Свойства-аксессоры представлены методами: «геттер» – для чтения и «сеттер» – для записи.
 ## Store
   Это концепция используемая для распределения состояния между компонентами. В основном это простой объект `JavaScript`, который позволяет компонентам совместно использовать состояние. В нем может храниться как и сам `state`, так и методы работы с ним.
+## Dispatch & Action)
+  `Dispatch` (пер. Отправка) - это метод объекта `store` для более удобной работы со всеми остальными методами. Он принимает в себя 2 обязательных параметра: `action` и `type` (дополнительных может быть больше), имеет вложенные конструкции `if else`. Используется для изменения состояния `store`.  
+  `Action` (пер. Действие) - это стандартный аргумент `dispatch` - объект, у которого обязательно есть свойство `type`, благодаря нему мы можем обрабатывать различные действия по их типу, попадая в нужную секцию `if else`.
+```jsx
+  // state.js
+  let store = {
+    _state: '',
+    dispatch(action) { // { type: 'ADD-POST' }
+      if (action.type === 'ADD-POST') {
+        let newPost = {
+          id: 5,
+          message: this._state.profilePage.newPostText,
+        }
+      } else if (action.type === 'UPDATE-NEW-POST-TEXT' ) {
+        this._state.profilePage.newPostText = action.newText;
+        this._callSubscriber(this._state);
+      }
+    }
+  }
+  
+  // index.js
+  <App state={ state } dispatch={ store.dispatch.bind(store) } />
+  
+  // App.js
+  <Route path='/profile' render={ () => <Profile dispatch={ props.dispatch } /> } />
+  
+  // Profile.js  
+  let onPostChange = () => {
+    let text = newPostElement.current.value;
+    
+    props.dispatch({ type: 'UPDATE-NEW-POST-TEXT', text: text });
+  }
+  
+  return (
+    <textarea onChange={ onPostChange } ref={ newPostElement } ></textarea>
+  )
+```
+## Action creator, Action type
+  Action creator - это функция которая возвращает объект `action` для использования в `dispatch`.
+  Action type - это строковая константа, которая записывается в свойство `type` объекта `action`.
+```jsx
+const ADD_POST = 'ADD-POST';
+const UPDATE_NEW_POST_TEXT = 'UPDATE-NEW-POST-TEXT';
+
+// state.js
+let store = {
+  _state: '',
+  dispatch(action) { // { type: 'ADD-POST' }
+    if (action.type === ADD_POST) {
+      let newPost = {
+        id: 5,
+        message: this._state.profilePage.newPostText,
+      }
+    } else if (action.type === UPDATE_NEW_POST_TEXT ) {
+      this._state.profilePage.newPostText = action.newText;
+      this._callSubscriber(this._state);
+    }
+  }
+}
+
+export const addPostActionCreator = () => {
+  return {
+    type: ADD_POST
+  }
+}
+
+export const updateNewPostTextActionCreator = (text) => {
+  return {
+    type: UPDATE_NEW_POST_TEXT,
+    newText: text
+  }
+}
+
+// Profile.js
+import { addPostActionCreator, updateNewPostTextActionCreator } from './../...state.js';
+
+let addPost = () => {
+  props.dispatch( addPostActionCreator() );
+}
+
+let addPost = () => {
+  let text = newPostElement.current.value;
+  
+  props.dispatch( updateNewPostTextActionCreator( text ) );
+}
+```
+
 ### Понятия и Термины
 ###### The Single Responsibility Principle, SRP
   Принцип единственно ответственности - это принцип ООП означающий, что каждый объект должен иметь одну ответсвенность и причину существования.
