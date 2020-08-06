@@ -447,6 +447,25 @@ let addPost = () => {
   props.dispatch( updateNewPostTextActionCreator( text ) );
 }
 ```
+## Reducer
+  Это чистая функция которая принимает `state` и `action`, если нужно применяет этот `action` к `state` и возвращает новый `state`, либо неизмененный `state`.
+```jsx
+reducer(state, action) {
+  ...
+  return changedState;
+}
+```
+  После возвращения нового `state`, "подписчики" будут уведомлены о изменениях в `state` и смогут запросить изменения с помощью `getState`.
+## Redux
+```bash
+npm install redux --save
+```
+  В `redux` по умолчанию есть функция по созданию `store`.
+```jsx
+import { createStore } from "redux";
+
+let store = createStore();
+```
 
 ### Понятия и Термины
 ###### The Single Responsibility Principle, SRP
