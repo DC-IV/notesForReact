@@ -460,13 +460,94 @@ reducer(state, action) {
 ```bash
 npm install redux --save
 ```
-  В `redux` по умолчанию есть функция по созданию `store`.
+  В `redux` по умолчанию есть функция по созданию `store`. Также `redux` по умолчанию уведомляет своих подписчиков об изменении `state`, но не передает им `state`. Для этого требуется с вызовом функции рендеринга DOM дерева передавать ей `state` в параметрах.
 ```jsx
-import { createStore } from "redux";
+// index.js
+let rerenderEntireTree = (state) => {
+  ReactDOM.render(
+    <BrowserRouter>
+      <App state={state} dispatch={store.dispatch.bind(store)} store={store} />
+    </BrowserRouter>, document.getElementById('root'));
+  )
+}
 
-let store = createStore();
+rerenderEntireTree(store.getState()); // ПОЛУЧАЕМ STATE С ПОМОЩЬЮ ВСТРОЕННОГО МЕТОДА REDUX
+
+// УВЕДОМЛЕНИЕ ПОДПИСЧИКОВ ПРИ ИЗМЕНИИ STATE
+store.subscribe(() => {
+  let state = store.getState();
+  rerenderEntireTree(state);
+})
 ```
+  В переменную `reducers` записываются `state` в качестве названия свойства объекта и сами `reducers` в качестве значений.
+```jsx
+// redux.js
+import { combineReducers, createStore } from "redux";
+import profileReducer from "./profile-reducer";
+import dialogsReducer from "./dialogs-reducer";
+import sidebarReducer from "./sidebar-reducer";
 
+let reducers = combineReducers({
+  profilePage: profileRecuder,
+  dialogsPage: dialogsReducer,
+  sidebar: sidebarReducer
+});
+
+let store = createStore(reducers);
+
+export default store;
+```
+## Container component
+  Это **контейнерная компонента** которая является оберткой над комопнентом. Может не удовлетворять требованиям чистой функции. Она будет получать в себя `store`, а также проводить все манипуляции с ним, для дальнейшей передачи в **презентационную компоненту**.
+```jsx
+// App.js
+<Route render = { () => <DialogsContainer store={ props.store } /> } />
+////
+
+// DialogsContainer.jsx
+import Dialogs from './Dialogs.js';
+
+const DialogsContainer = (props) => {
+  let onNewMessageChange = (body) => {
+    props.state.dispatch(updateNewMessageBodyCreator(body));
+  }
+  
+  return <Dialogs updateNewMessageBody={ onNewMessageChange } />
+}
+
+export default DialogsContainer;
+////
+
+// Dialogs.js
+let onNewMessageChange = (e) => {
+  let body = e.target.value;
+  props.updateNewMessageBody(body);
+}
+////
+```
+  То есть для `render` мы уже передаем компонент `DialogsContainer`, в него же передаем `props`, проводим все манипуляции с ним и возвращем компонент `Dialogs`.
+## Контекст
+  Контекст позволяет передавать данные через дерево компонентов без необходимости передавать пропсы на промежуточных уровнях. Контекст разработан для передачи данных, которые можно назвать "глобальными" для всего дерева Реакт-компонентов (например, текущий текущий аутентифицированный пользователь, UI-тема или выбранный язык).  
+  Обычно контекст используется, если необходимо обеспечить доступ данных во *многих* компонентах на разных уровнях вложенности. По возможности не стоит его использовать, так как это усложняет повторное использованиекомпонентов.
+> Если необходимо избавиться от передачи нескольких пропсов на множество уровней вниз, обычно **[композиция компонентов](https://ru.reactjs.org/docs/composition-vs-inheritance.html)** является более простым решением, чем контекст.  
+
+  Для использования контекста его нужно создать с дефолтным значением `const MyContext = React.createContext(defaultValue);`. Далее копмонент должен создать `Provider` (поставщик) и передать в него значение `< MyContext.Provider value={ /* store value */ } />`. Дочерний компонент принимает контекст и яляется `Consumer` (потребителем) `<MyContext.Consumer> { value } </MyContext.Consumer>`.
+```jsx
+// DialogsContainer.js
+const DialogsContainer = () => {
+  return <StoreContext.Consumer>
+  {
+    (store) => {
+      let onNewMessageChange = (body) => {
+        store.dispatch(updateNewMessageBodyCreator(body));
+      }
+
+      return <Dialogs updateNewMessageBody={ onNewMessageChange } />
+    }
+  }
+  </StoreContext.Consumer>
+}
+```
 ### Понятия и Термины
 ###### The Single Responsibility Principle, SRP
   Принцип единственно ответственности - это принцип ООП означающий, что каждый объект должен иметь одну ответсвенность и причину существования.
