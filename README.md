@@ -617,6 +617,22 @@ const DialogsContainer = () => {
   }
 ```
   `extends` - означает что данный класс наследует методы от реакта. Внутри классовых компонентов нельзя объявлять обычные функции, их стоит записывать как методы объекта.
+## Life cycle methods
+  У любого класса React.Component есть два метода `componentDidMount() && componentDidUpdate()`. **componentDidMount** это как раз то место где стоит делать все `side effect`, ajax запросы и т.д. Перед тем как компонент будет убран со страницы, то есть демонтирован, вызывается **componentWillUnmount**.
+  ```jsx
+  class Man extends React.Component {
+    componentDidMount() {
+       axios.get("https://social-network.samuraijs.com/api/1.0/users ")
+        .then(response => {
+          this.props.setUsers(response.data.items);
+        });
+    }
+  
+    render() {...}
+  }
+```
+## Презентационная и контейнерная компонента
+  *Презентационная компонента* принимает пропсы и возвращает jsx. *Контейнерная компонента* - назначение, общаться со store, с помощью connect.
 ### ==============================Понятия и Термины==============================
 ###### The Single Responsibility Principle, SRP
   Принцип единственно ответственности - это принцип ООП означающий, что каждый объект должен иметь одну ответсвенность и причину существования.
