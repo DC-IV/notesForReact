@@ -909,3 +909,22 @@ describe( "duck reducer", function( ) {
   `Jest` это среда запуска тестов.  
   `react-test-renderer`.
 ## React.Lazy и React.Suspense
+  Используется для ленивой дозагрузки компонентов.
+`const DialogsContainer = React.lazy( () => import('./components/Dialogs/DialogsContainer'));`
+  Компонент будет загружен только при запросе на данный компонент. В итоговый `bundle` он не попадет. А саму компоненту необходимо завернуть `suspense`:
+```jsx
+<React.Suspense fallback={<div>Loading...</div>}>
+  <DialogsContainer />
+</React.Suspense>
+```
+  В параметре `fallback` указывается разметка, которая будет показываться пока компонент не будет загружен.
+## Хостинг React приложения - Github Pages
+  Github pages не является полноценным хостингом, поэтому не достаточно просто закинуть в репозиторий папку `build` своего проекта.  
+  1. Установить пакет **gh-pages**:  
+  `yarn add gh-pages --dev`  
+  2. Необходимо внести правки в наш `package.json`: 
+  ```jsx
+  //...
+  "homepage": "http://gitname.github.io/react-gh-pages"
+  ```
+На нашем репозитории теперь будут две главные ветки: `master` и `gh-pages`. Ветка `master` будет обращаться к каталогу `src`, а `gh-pages` к файлам специально скомпилированным для хостинга на github.
