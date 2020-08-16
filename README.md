@@ -928,3 +928,31 @@ describe( "duck reducer", function( ) {
   "homepage": "http://gitname.github.io/react-gh-pages"
   ```
 На нашем репозитории теперь будут две главные ветки: `master` и `gh-pages`. Ветка `master` будет обращаться к каталогу `src`, а `gh-pages` к файлам специально скомпилированным для хостинга на github.
+## Router switch
+  Для предотвращения неверной работы роутов, стоит использовать компонент `<Switch />`, которым необходимо завернуть наши `<Route />`. В таком случае переход по нашим роутрам будет происходить сверху вниз и при первом найденном совпадении, дальнейшие роуты не будут учтены.  
+  Для добавления 404 страницы нужно добавить данный роутер в самый конец списка:
+```jsx
+<Switch>
+  <Route exact path="/" render={ () => <Redirect to={'/profile'} /> } />
+  <Route path="/dialogs" render={withSuspense(DialogsContainer)} />
+  <Route path="/profile/:userId?" render={withSuspense(ProfileContainer)} />
+  
+  <Route path="*" render={ () => {<div>404 not found</div>} } />
+</Switch>
+```
+## Classnames
+  Для добавления классов элементам при использовании css модулей следует импортировать переменную из файла стилей, а в компоненте использовать данную переменную и обращаться к классам через точечную нотацию.
+```jsx
+import classes from './Paginator.module.css';
+
+<div className={styles.paginator}>...</div>
+```
+Для добавления нескольких классов к одному компоненту необходимо использовать конкатенацию строк:  
+```jsx
+<div className={styles.paginator + ' ' + styles.selectedPage}>...</div>
+```
+Или использовать шаблонную строку:  
+```jsx
+<div className={`${styles.paginator} ${styles.selectedPage}`}>...</div>
+```
+Но лучшим решением будет использование библиотеки [classnames](https://www.npmjs.com/package/classnames).
